@@ -1,4 +1,5 @@
-// Copyright 2025-2026 @alice-protocol authors & contributors
+// Copyright 2019-2026 @polkadot/extension authors & contributors
+// Alice Protocol fork — added for the Alice-only wallet build
 // SPDX-License-Identifier: Apache-2.0
 
 import type * as _ from '@polkadot/dev-test/globals.d.ts';
