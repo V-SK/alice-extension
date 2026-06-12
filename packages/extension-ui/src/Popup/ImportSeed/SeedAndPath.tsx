@@ -8,11 +8,12 @@ import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { ALICE_GENESIS_HASH } from '@polkadot/extension-base/alice';
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
-import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components/index.js';
-import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
+import { ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components/index.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -24,13 +25,13 @@ interface Props {
 
 function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
-  const [genesis, setGenesis] = useState('');
+  // Alice-only: imported accounts are pinned to the Alice genesis.
+  const genesis = ALICE_GENESIS_HASH;
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -86,13 +87,6 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
             {t('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
           </Warning>
         )}
-        <Dropdown
-          className='genesisSelection'
-          label={t('Network')}
-          onChange={setGenesis}
-          options={genesisOptions}
-          value={genesis}
-        />
         <div
           className='advancedToggle'
           onClick={_onToggleAdvanced}

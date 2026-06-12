@@ -1,6 +1,7 @@
 // Copyright 2019-2026 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export { default as useAliceBalance } from './useAliceBalance.js';
 export { default as useGenesisHashOptions } from './useGenesisHashOptions.js';
 export { default as useIsMounted } from './useIsMounted.js';
 export { default as useIsPopup } from './useIsPopup.js';

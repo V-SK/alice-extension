@@ -9,10 +9,11 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { canDerive } from '@polkadot/extension-base/utils';
 
 import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider, SettingsContext } from '../../components/index.js';
-import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
+import { useAliceBalance, useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
 import { editAccount, tieAccount } from '../../messaging.js';
 import { Name } from '../../partials/index.js';
 import { styled } from '../../styled.js';
+import AliceBalanceRow from './Balance.js';
 
 interface Props extends AccountJson {
   className?: string;
@@ -33,6 +34,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   const [editedName, setName] = useState<string | undefined | null>(name);
   const [checked, setChecked] = useState(false);
   const genesisOptions = useGenesisHashOptions();
+  const aliceBalance = useAliceBalance(isExternal ? null : address);
   const { ledgerApp } = useContext(SettingsContext);
   const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const isSelected = useMemo(() => selectedAccounts?.includes(address) || false, [address, selectedAccounts]);
@@ -159,6 +161,13 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
           />
         )}
       </Address>
+      {!isExternal && (
+        <AliceBalanceRow
+          free={aliceBalance.free}
+          status={aliceBalance.status}
+          token={aliceBalance.token}
+        />
+      )}
     </div>
   );
 }

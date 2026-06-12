@@ -5,12 +5,13 @@ import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import { ALICE_GENESIS_HASH } from '@polkadot/extension-base/alice';
+
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
-import { ActionContext, Address, Dropdown, Loading } from '../../components/index.js';
-import { useGenesisHashOptions, useMetadata, useTranslation } from '../../hooks/index.js';
+import { ActionContext, Address, Loading } from '../../components/index.js';
+import { useMetadata, useTranslation } from '../../hooks/index.js';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging.js';
 import { HeaderWithSteps } from '../../partials/index.js';
-import { styled } from '../../styled.js';
 import { DEFAULT_TYPE } from '../../util/defaultType.js';
 import Mnemonic from './Mnemonic.js';
 
@@ -18,7 +19,7 @@ interface Props {
   className?: string;
 }
 
-function CreateAccount ({ className }: Props): React.ReactElement {
+function CreateAccount (_props: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -27,8 +28,8 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
-  const options = useGenesisHashOptions();
-  const [genesisHash, setGenesis] = useState<HexString | null>(null);
+  // Alice-only: every account is pinned to the Alice genesis at creation.
+  const [genesisHash] = useState<HexString>(ALICE_GENESIS_HASH);
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
@@ -81,11 +82,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     []
   );
 
-  const _onChangeNetwork = useCallback(
-    (newGenesisHash: HexString) => setGenesis(newGenesisHash),
-    []
-  );
-
   return (
     <>
       <HeaderWithSteps
@@ -109,22 +105,13 @@ function CreateAccount ({ className }: Props): React.ReactElement {
               />
             )
             : (
-              <>
-                <Dropdown
-                  className={className}
-                  label={t('Network')}
-                  onChange={_onChangeNetwork}
-                  options={options}
-                  value={genesisHash}
-                />
-                <AccountNamePasswordCreation
-                  buttonLabel={t('Add the account with the generated seed')}
-                  isBusy={isBusy}
-                  onBackClick={_onPreviousStep}
-                  onCreate={_onCreate}
-                  onNameChange={setName}
-                />
-              </>
+              <AccountNamePasswordCreation
+                buttonLabel={t('Add the account with the generated seed')}
+                isBusy={isBusy}
+                onBackClick={_onPreviousStep}
+                onCreate={_onCreate}
+                onNameChange={setName}
+              />
             )
         )}
       </Loading>
@@ -132,10 +119,4 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(CreateAccount)<Props>`
-  margin-bottom: 16px;
-
-  label::after {
-    right: 36px;
-  }
-`;
+export default CreateAccount;

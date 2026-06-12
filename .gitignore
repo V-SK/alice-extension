@@ -33,3 +33,9 @@ packages/extension/manifest.json
 
 # Diff script generates ff-diff
 ff-diff
+# Alice build artifacts
+packages/*/build/
+packages/extension/manifest.json
+dist/
+*.zip
+.yarn/install-state.gz
