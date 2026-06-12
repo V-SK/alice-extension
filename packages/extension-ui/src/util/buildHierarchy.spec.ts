@@ -8,9 +8,13 @@ import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/
 
 import { buildHierarchy } from './buildHierarchy.js';
 
+// Alice-only build: the network map now contains exactly one chain (Alice).
+// ALICE resolves to the network name "Alice"; UNKNOWN resolves to '' and
+// therefore sorts ahead of named networks. The two network-sort cases below
+// exercise that single-chain ordering.
 const genesisExample = {
-  KUSAMA: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-  POLKADOT: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
+  ALICE: '0x7746a1d14736a95e00a617a11094b6e86bbf91cd4e7e64c0e748e3c0d2ad54b0',
+  UNKNOWN: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
 } as const;
 
 const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[]): void => {
@@ -68,16 +72,17 @@ describe('Use Account Hierarchy', () => {
   });
 
   it('sorts accounts by network', () => {
+    // UNKNOWN genesis -> network name '' sorts ahead of ALICE -> 'Alice'.
     testHierarchy(
-      [{ address: 'b', genesisHash: genesisExample.KUSAMA }, { address: 'a', genesisHash: genesisExample.POLKADOT }, { address: 'c', genesisHash: genesisExample.KUSAMA }],
-      [{ address: 'b', genesisHash: genesisExample.KUSAMA }, { address: 'c', genesisHash: genesisExample.KUSAMA }, { address: 'a', genesisHash: genesisExample.POLKADOT }]
+      [{ address: 'b', genesisHash: genesisExample.UNKNOWN }, { address: 'a', genesisHash: genesisExample.ALICE }, { address: 'c', genesisHash: genesisExample.UNKNOWN }],
+      [{ address: 'b', genesisHash: genesisExample.UNKNOWN }, { address: 'c', genesisHash: genesisExample.UNKNOWN }, { address: 'a', genesisHash: genesisExample.ALICE }]
     );
   });
 
   it('sorts accounts by network and name', () => {
     testHierarchy(
-      [{ address: 'b', genesisHash: genesisExample.KUSAMA, name: 'b-last-kusama' }, { address: 'a', genesisHash: genesisExample.POLKADOT }, { address: 'c', genesisHash: genesisExample.KUSAMA, name: 'a-first-kusama' }],
-      [{ address: 'c', genesisHash: genesisExample.KUSAMA, name: 'a-first-kusama' }, { address: 'b', genesisHash: genesisExample.KUSAMA, name: 'b-last-kusama' }, { address: 'a', genesisHash: genesisExample.POLKADOT }]
+      [{ address: 'b', genesisHash: genesisExample.UNKNOWN, name: 'b-last-unknown' }, { address: 'a', genesisHash: genesisExample.ALICE }, { address: 'c', genesisHash: genesisExample.UNKNOWN, name: 'a-first-unknown' }],
+      [{ address: 'c', genesisHash: genesisExample.UNKNOWN, name: 'a-first-unknown' }, { address: 'b', genesisHash: genesisExample.UNKNOWN, name: 'b-last-unknown' }, { address: 'a', genesisHash: genesisExample.ALICE }]
     );
   });
 
