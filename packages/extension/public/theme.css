@@ -20,48 +20,50 @@ div#root {
   --boxLineHeight: 1rem;
   --boxMargin: 0.75rem 0;
   --boxPadding: 0 0.25rem;
-  --fontFamily: Nunito, sans-serif;
+  --fontFamily: 'Inter', 'Nunito', sans-serif;
+  --fontFamilyMono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   --fontSize: 16px;
   --inputLabelFontSize: 10px;
   --labelFontSize: 13px;
   --labelLineHeight: 18px;
   --lineHeight: 26px;
-  /* shared colors */
+  /* shared colors — Alice brand (#F97316 orange) */
   --accountDotsIconColor: #8E8E8E;
-  --buttonBackground: #E86F00;
+  --buttonBackground: #F97316;
   --buttonBackgroundDangerHover: #D93B3B;
-  --buttonBackgroundHover: #ED9329;
+  --buttonBackgroundHover: #FB8B3C;
   --buttonTextColor: #FFFFFF;
   --connectedDotColor: seagreen;
   --errorColor: #E42F2F;
-  --iconWarningColor: #FF7D01;
+  --iconWarningColor: #F97316;
   --identiconBackground: #F4F5F8;
-  --primaryColor: #FF7D01;
+  --primaryColor: #F97316;
 }
 
 [data-theme="dark"] {
-  --addAccountImageBackground: #1A1B20;
-  --backButtonBackground: #3A3B41;
-  --backButtonBackgroundHover: #3a3b41ad;
+  /* Alice dark — #050505 page background, zinc surfaces */
+  --addAccountImageBackground: #111113;
+  --backButtonBackground: #27272A;
+  --backButtonBackgroundHover: #27272aad;
   --backButtonTextColor: #FFFFFF;
-  --background: #26272C;
-  --bodyColor: #20222A;
-  --boxBackground: #1A1B20;
-  --boxBorderColor: #303030;
+  --background: #0A0A0B;
+  --bodyColor: #050505;
+  --boxBackground: #111113;
+  --boxBorderColor: #27272A;
   --boxShadow: rgba(0, 0, 0, 0.86);
   --buttonBackgroundDanger: #AF1111;
   --errorBorderColor: #7E3530;
-  --highlightedAreaBackground: #212226;
+  --highlightedAreaBackground: #18181B;
   --iconDangerColor: #AF1111;
   --iconNeutralColor: #8E8E8E;
-  --inputBackground: #111218;
-  --inputBorderColor: #43444B;
-  --labelColor: #9F9E99;
-  --parentLabelColor: #4A7463;
-  --popupBackground: #38393F;
-  --readonlyInputBackground: #1A1B20;
-  --subTextColor: #DDD;
-  --textColor: #FFFFFF;
+  --inputBackground: #09090B;
+  --inputBorderColor: #3F3F46;
+  --labelColor: #A1A1AA;
+  --parentLabelColor: #C2632A;
+  --popupBackground: #18181B;
+  --readonlyInputBackground: #111113;
+  --subTextColor: #D4D4D8;
+  --textColor: #FAFAFA;
   --textColorDanger: #FF8686;
 }
 

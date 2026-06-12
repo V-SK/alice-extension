@@ -11,8 +11,13 @@ import { injectExtension } from '@polkadot/extension-inject';
 import { packageInfo } from './packageInfo.js';
 
 function inject () {
+  // Inject under window.injectedWeb3.alice. aliceprotocol.org's
+  // "Sign in with Alice" calls window.injectedWeb3.alice.enable(origin)
+  // then signer.signRaw(payload) (standard @polkadot/extension-dapp shape).
+  // Generic web3Enable() discovery enumerates all injectedWeb3 keys, so this
+  // remains discoverable by any standard dapp library.
   injectExtension(enable, {
-    name: 'polkadot-js',
+    name: 'alice',
     version: packageInfo.version
   });
 }
