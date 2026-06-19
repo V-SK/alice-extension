@@ -5,13 +5,16 @@
 import type * as _ from '@polkadot/dev-test/globals.d.ts';
 import type { ApiPromise } from '@polkadot/api';
 
-import { ALICE_GENESIS_HASH } from '@polkadot/extension-base/alice';
+import { ALICE_GENESIS_HASH, ALICE_MIN_SPEC_VERSION } from '@polkadot/extension-base/alice';
 
-import { assertAliceGenesis, GenesisMismatchError, isAliceGenesis } from './validateChain.js';
+import { assertAliceGenesis, assertAliceSpecVersion, GenesisMismatchError, isAcceptedAliceSpecVersion, isAliceGenesis, SpecVersionError } from './validateChain.js';
 
-// Minimal stand-in for the only ApiPromise surface assertAliceGenesis touches.
-function mockApi (genesisHex: string): ApiPromise {
-  return { genesisHash: { toHex: () => genesisHex } } as unknown as ApiPromise;
+// Minimal stand-in for the only ApiPromise surface the asserts touch.
+function mockApi (genesisHex: string, specVersion = ALICE_MIN_SPEC_VERSION): ApiPromise {
+  return {
+    genesisHash: { toHex: () => genesisHex },
+    runtimeVersion: { specVersion: { toNumber: () => specVersion } }
+  } as unknown as ApiPromise;
 }
 
 // Returns the thrown error, or fails if nothing was thrown.
@@ -61,5 +64,30 @@ describe('Alice fail-closed genesis check', () => {
     expect(isAliceGenesis(ALICE_GENESIS_HASH)).toEqual(true);
     expect(isAliceGenesis(ALICE_GENESIS_HASH.toUpperCase())).toEqual(false);
     expect(isAliceGenesis('0x00')).toEqual(false);
+  });
+});
+
+describe('Alice runtime specVersion guard (>= 110)', () => {
+  it('accepts exactly the minimum specVersion', () => {
+    expect(() => assertAliceSpecVersion(mockApi(ALICE_GENESIS_HASH, ALICE_MIN_SPEC_VERSION))).not.toThrow();
+  });
+
+  it('accepts a newer specVersion', () => {
+    expect(() => assertAliceSpecVersion(mockApi(ALICE_GENESIS_HASH, ALICE_MIN_SPEC_VERSION + 42))).not.toThrow();
+  });
+
+  it('rejects a pre-launch / stale runtime', () => {
+    const error = captureThrow(() => assertAliceSpecVersion(mockApi(ALICE_GENESIS_HASH, ALICE_MIN_SPEC_VERSION - 1)));
+
+    expect(error).toBeInstanceOf(SpecVersionError);
+    expect((error as SpecVersionError).minimum).toEqual(ALICE_MIN_SPEC_VERSION);
+    expect((error as SpecVersionError).actual).toEqual(ALICE_MIN_SPEC_VERSION - 1);
+  });
+
+  it('isAcceptedAliceSpecVersion is a >= predicate', () => {
+    expect(isAcceptedAliceSpecVersion(ALICE_MIN_SPEC_VERSION)).toEqual(true);
+    expect(isAcceptedAliceSpecVersion(ALICE_MIN_SPEC_VERSION + 1)).toEqual(true);
+    expect(isAcceptedAliceSpecVersion(ALICE_MIN_SPEC_VERSION - 1)).toEqual(false);
+    expect(isAcceptedAliceSpecVersion(0)).toEqual(false);
   });
 });

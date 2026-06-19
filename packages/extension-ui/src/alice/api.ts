@@ -6,7 +6,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { ALICE_RPC_ENDPOINT } from '@polkadot/extension-base/alice';
 
-import { assertAliceGenesis } from './validateChain.js';
+import { assertAliceGenesis, assertAliceSpecVersion } from './validateChain.js';
 
 // Single, lazily-created connection to the pinned Alice RPC. The popup is
 // short-lived, so we cache the ready promise for the lifetime of the page
@@ -31,8 +31,11 @@ async function connect (): Promise<ApiPromise> {
   }
 
   try {
-    // Fail closed: a wrong-chain / malicious RPC is rejected here.
+    // Fail closed: a wrong-chain / malicious RPC is rejected here (genesis is
+    // the hard identity gate), then a stale / pre-launch runtime is rejected
+    // (specVersion >= 110).
     assertAliceGenesis(api);
+    assertAliceSpecVersion(api);
   } catch (error) {
     await api.disconnect().catch(() => undefined);
     throw error;

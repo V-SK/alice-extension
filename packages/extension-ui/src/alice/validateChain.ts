@@ -4,7 +4,7 @@
 
 import type { ApiPromise } from '@polkadot/api';
 
-import { ALICE_GENESIS_HASH } from '@polkadot/extension-base/alice';
+import { ALICE_GENESIS_HASH, ALICE_MIN_SPEC_VERSION } from '@polkadot/extension-base/alice';
 
 export class GenesisMismatchError extends Error {
   public readonly expected: string;
@@ -14,6 +14,18 @@ export class GenesisMismatchError extends Error {
     super(`Alice chain identity check failed: expected genesis ${expected}, got ${actual}. Refusing to use this RPC.`);
     this.name = 'GenesisMismatchError';
     this.expected = expected;
+    this.actual = actual;
+  }
+}
+
+export class SpecVersionError extends Error {
+  public readonly minimum: number;
+  public readonly actual: number;
+
+  constructor (minimum: number, actual: number) {
+    super(`Alice runtime too old: need specVersion >= ${minimum}, got ${actual}. Refusing to use this node.`);
+    this.name = 'SpecVersionError';
+    this.minimum = minimum;
     this.actual = actual;
   }
 }
@@ -41,4 +53,23 @@ export function assertAliceGenesis (api: ApiPromise): void {
  */
 export function isAliceGenesis (genesisHex: string): boolean {
   return genesisHex === ALICE_GENESIS_HASH;
+}
+
+/**
+ * Secondary guard: accept any runtime specVersion >= ALICE_MIN_SPEC_VERSION
+ * (currently 110). Genesis is the hard identity gate; this rejects a stale /
+ * pre-launch Alice runtime on the right genesis. Throws SpecVersionError when
+ * the live runtime is older than the minimum.
+ */
+export function assertAliceSpecVersion (api: ApiPromise): void {
+  const actual = api.runtimeVersion.specVersion.toNumber();
+
+  if (actual < ALICE_MIN_SPEC_VERSION) {
+    throw new SpecVersionError(ALICE_MIN_SPEC_VERSION, actual);
+  }
+}
+
+/** Pure check for unit tests / callers holding the number. */
+export function isAcceptedAliceSpecVersion (specVersion: number): boolean {
+  return specVersion >= ALICE_MIN_SPEC_VERSION;
 }

@@ -33,6 +33,15 @@ export const ALICE_CHAIN_NAME = 'Alice';
 export const ALICE_SPEC_NAME = 'solochain-template-runtime';
 
 /**
+ * Minimum accepted runtime specVersion. Genesis (ALICE_GENESIS_HASH) is the
+ * hard chain-identity gate; this is a secondary guard that refuses to operate
+ * against an Alice node running a runtime older than this. Alice mainnet
+ * launched at specVersion 110, so a lower value means a stale / pre-launch
+ * node we should not transact against. Any specVersion >= this is accepted.
+ */
+export const ALICE_MIN_SPEC_VERSION = 110;
+
+/**
  * The single RPC endpoint. Must be wss:// (TLS). This is the ONLY network
  * host the extension is permitted to reach.
  */

@@ -1,9 +1,9 @@
 {
-  "author": "polkadot.{js}",
-  "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
-  "homepage_url": "https://github.com/polkadot-js/extension",
-  "name": "polkadot{.js} extension",
-  "short_name": "polkadot{.js}",
+  "author": "Alice Protocol",
+  "description": "Alice Wallet — hot wallet for Alice Protocol. Sign in with Alice, view balances, manage accounts. Keys never leave your device.",
+  "homepage_url": "https://aliceprotocol.org",
+  "name": "Alice Wallet",
+  "short_name": "Alice Wallet",
   "manifest_version": 3,
   "permissions": ["storage", "tabs"],
   "background": {
@@ -11,18 +11,21 @@
     "type": "module"
   },
   "action": {
-    "default_title": "polkadot{.js}",
+    "default_title": "Alice Wallet",
     "default_popup": "index.html"
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "{7e3ce1f0-15fb-4fb1-99c6-25774749ec6d}",
+      "id": "wallet@aliceprotocol.org",
       "strict_min_version": "108.0.2"
     }
   },
   "content_scripts": [{
     "js": ["content.js"],
-    "matches": ["http://*/*", "https://*/*"],
+    "matches": [
+      "https://aliceprotocol.org/*",
+      "https://*.aliceprotocol.org/*"
+    ],
     "run_at": "document_start"
   }],
   "icons": {
@@ -38,7 +41,8 @@
         "page.js"
       ],
       "matches": [
-        "*://*/*"
+        "https://aliceprotocol.org/*",
+        "https://*.aliceprotocol.org/*"
       ]
     }
   ],
