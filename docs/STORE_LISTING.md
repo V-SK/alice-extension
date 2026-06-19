@@ -121,3 +121,36 @@ Alice 钱包用于登录及小额日常使用。对于大额持有，请使用 *
   或任何第三方传输任何数据。无分析、无遥测、无远程代码。唯一的网络连接是连接 Alice RPC
   端点（wss://rpc.aliceprotocol.org），用于读取链上余额和提交用户授权的签名。
 - 单一用途：Alice Protocol 网络的钱包/签名器。
+
+---
+
+## SUBMISSION RUNBOOK (for V — the account/terms/upload steps Claude can't do)
+
+**Ready artifacts (Claude-prepared):**
+- Chrome MV3 zip: `alice-extension/dist/alice-extension-v0.1.0.zip` (rebuilt from current source)
+- Firefox AMO zip: `alice-extension/master-ff-build.zip` (run `yarn build` to refresh)
+- Privacy policy (LIVE, required): https://aliceprotocol.org/privacy
+- Public source repo: https://github.com/V-SK/alice-extension
+- Listing copy: this file (English section above)
+
+**Step 1 — Chrome Web Store developer account (one-time):**
+- Go to https://chrome.google.com/webstore/devconsole — sign in with the Google account that will own the listing, pay the one-time **$5** registration fee.
+
+**Step 2 — Screenshots (store requires ≥1; 1280×800 or 640×400):**
+- `chrome://extensions` → toggle **Developer mode** (top-right) → **Load unpacked** → select
+  `/Users/v/Alice/alice-extension/packages/extension/build`
+- Click the Alice icon in the toolbar → screenshot the popup. Capture 2–3 views:
+  the create/import onboarding, the accounts list, and a sign-in approval if easy.
+  (Claude can guide this live via teach-mode on request.)
+
+**Step 3 — Create the item + submit:**
+- Dev console → **New item** → upload `alice-extension-v0.1.0.zip`.
+- Paste Name / Summary / Description / Category from the English section above.
+- Add the screenshots; set **Privacy policy URL** = https://aliceprotocol.org/privacy
+- **Permissions justification** tab: paste the storage/tabs/host-access lines above.
+- Data-use disclosure: "Does not collect user data" (keys are encrypted, stored locally, never uploaded).
+- Accept the developer agreement → **Submit for review** (review typically 1–3 days).
+
+**Step 4 — Firefox AMO (parallel, optional):**
+- https://addons.mozilla.org/developers/ → submit `master-ff-build.zip`. Confirm the
+  gecko id `wallet@aliceprotocol.org` is free before first submit.
