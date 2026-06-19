@@ -8,10 +8,11 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAliceTransferSign, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAliceTransferSign, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
 import type { AuthorizedAccountsDiff } from './State.js';
 import type State from './State.js';
 
+import { ALICE_GENESIS_HASH } from '@polkadot/extension-base/alice';
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { TypeRegistry } from '@polkadot/types';
@@ -20,6 +21,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import RequestExtrinsicSign from '../RequestExtrinsicSign.js';
 import { withErrorLog } from './helpers.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
@@ -341,6 +343,55 @@ export default class Extension {
     };
   }
 
+  // Alice native send: sign a Balances.transferKeepAlive payload IN THE
+  // BACKGROUND. The popup builds the SignerPayloadJSON with the Alice api and
+  // submits the signed tx itself; the secret key never leaves this process.
+  //
+  // Signing reuses the SAME audited seam as the dApp path — a RequestExtrinsicSign
+  // whose .sign(registry, pair) creates the ExtrinsicPayload and signs it with the
+  // keyring pair. We additionally enforce the Alice genesis on the payload (B1
+  // defense-in-depth: refuse to produce a signature bound to any other chain) and
+  // re-lock the pair after signing.
+  private aliceTransferSign ({ address, password, payload }: RequestAliceTransferSign): ResponseAliceTransferSign {
+    assert(payload.genesisHash === ALICE_GENESIS_HASH, 'Refusing to sign: payload genesis is not Alice mainnet');
+    assert(payload.address === address, 'Payload address does not match the signing account');
+
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+    assert(!pair.meta.isExternal, 'Cannot sign with an external/watch-only account');
+
+    this.refreshAccountPasswordCache(pair);
+
+    if (pair.isLocked) {
+      assert(password, 'Password needed to unlock the account');
+      pair.decodePkcs8(password);
+    }
+
+    try {
+      // Build a registry that knows the payload's signed extensions, exactly as
+      // signingApprovePassword does for a JSON payload, then delegate to the
+      // audited RequestExtrinsicSign.sign().
+      const registry = new TypeRegistry();
+      const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
+
+      if (metadata) {
+        const expanded = metadataExpand(metadata, false);
+
+        registry.setSignedExtensions(payload.signedExtensions, expanded.definition.userExtensions);
+      } else {
+        registry.setSignedExtensions(payload.signedExtensions);
+      }
+
+      const { signature } = new RequestExtrinsicSign(payload).sign(registry, pair);
+
+      return { signature };
+    } finally {
+      // Never leave the pair unlocked after a one-shot send signature.
+      pair.lock();
+    }
+  }
+
   private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
@@ -592,6 +643,9 @@ export default class Extension {
 
       case 'pri(accounts.changePassword)':
         return this.accountsChangePassword(request as RequestAccountChangePassword);
+
+      case 'pri(alice.transfer.sign)':
+        return this.aliceTransferSign(request as RequestAliceTransferSign);
 
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);

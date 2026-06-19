@@ -16,9 +16,9 @@ interface Props {
   token: string;
 }
 
-// Read-only balance row shown under each account. v1 has NO transfer; the
-// hint points serious / sending users at the desktop wallet (embedded full
-// node). This is the clean seam where v2 will add an in-popup "Send" action.
+// Read-only balance row shown under each account. Sending is now available
+// in-popup via the account menu's "Send" action (Popup/Send) — the hint points
+// there. The balance number itself is still read-only here.
 function Balance ({ className, free, status, token }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
@@ -37,7 +37,7 @@ function Balance ({ className, free, status, token }: Props): React.ReactElement
         }
       </div>
       <div className='sendHint'>
-        {t('To send ALICE, use the Alice desktop wallet (full node).')}
+        {t('To send {{token}}, open the account menu and choose Send.', { replace: { token } })}
       </div>
     </div>
   );

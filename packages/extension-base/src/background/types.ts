@@ -92,6 +92,7 @@ export interface RequestSignatures {
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
+  'pri(alice.transfer.sign)': [RequestAliceTransferSign, ResponseAliceTransferSign];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
@@ -290,6 +291,26 @@ export interface RequestRpcUnsubscribe {
   method: string;
   subscriptionId: number | string;
   type: string;
+}
+
+/**
+ * Alice native-send signing request (popup → background). The popup builds the
+ * `Balances.transferKeepAlive` extrinsic with the Alice api and hands the
+ * resulting `SignerPayloadJSON` here together with the account address and the
+ * account password. The background unlocks the keyring pair, signs the payload
+ * via the SAME audited `RequestExtrinsicSign.sign(registry, pair)` seam the
+ * dApp path uses, re-locks the pair, and returns ONLY the signature. The raw
+ * seed/secret NEVER crosses into the popup. Mirrors the desktop wallet's B1
+ * genesis re-check before producing a signature.
+ */
+export interface RequestAliceTransferSign {
+  address: string;
+  password: string;
+  payload: SignerPayloadJSON;
+}
+
+export interface ResponseAliceTransferSign {
+  signature: HexString;
 }
 
 export interface RequestSigningApprovePassword {

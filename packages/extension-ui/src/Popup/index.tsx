@@ -24,6 +24,7 @@ import CreateAccount from './CreateAccount/index.js';
 import Derive from './Derive/index.js';
 import ImportSeed from './ImportSeed/index.js';
 import Metadata from './Metadata/index.js';
+import Send from './Send/index.js';
 import Signing from './Signing/index.js';
 import Export from './Export.js';
 import ExportAll from './ExportAll.js';
@@ -158,6 +159,7 @@ export default function Popup (): React.ReactElement {
                         <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                         <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
                         <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                        <Route path='/account/send/:address'>{wrapWithErrorBoundary(<Send />, 'send-address')}</Route>
                         <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                         <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route>
                         <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>

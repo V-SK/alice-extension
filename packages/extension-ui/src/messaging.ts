@@ -9,6 +9,7 @@ import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
@@ -137,6 +138,16 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
 
 export async function approveSignSignature (id: string, signature: HexString, signedTransaction?: HexString): Promise<boolean> {
   return sendMessage('pri(signing.approve.signature)', { id, signature, signedTransaction });
+}
+
+// Alice native send: hand the background a transferKeepAlive SignerPayloadJSON
+// plus the account password; the background unlocks the pair, signs, re-locks,
+// and returns ONLY the signature. The seed never reaches the popup. The popup
+// attaches this signature to the extrinsic and submits it via the Alice api.
+export async function signAliceTransfer (address: string, payload: SignerPayloadJSON, password: string): Promise<HexString> {
+  const { signature } = await sendMessage('pri(alice.transfer.sign)', { address, password, payload });
+
+  return signature;
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: HexString | null): Promise<boolean> {

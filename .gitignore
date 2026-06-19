@@ -39,3 +39,7 @@ packages/extension/manifest.json
 dist/
 *.zip
 .yarn/install-state.gz
+
+# stray Chrome "Pack extension" output (never commit the .pem key)
+*.crx
+*.pem

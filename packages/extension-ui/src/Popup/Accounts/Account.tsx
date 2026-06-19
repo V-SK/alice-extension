@@ -78,6 +78,14 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   const _actions = useMemo(() => (
     <>
+      {!isExternal && (
+        <Link
+          className='menuItem'
+          to={`/account/send/${address}`}
+        >
+          {t('Send')}
+        </Link>
+      )}
       <Link
         className='menuItem'
         onClick={_toggleEdit}
