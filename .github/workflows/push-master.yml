@@ -4,29 +4,30 @@ on:
     branches:
       - master
 
+# Alice fork: upstream's `build:release` (polkadot-ci-ghact-build) publishes to the
+# polkadot-js npm + GitHub releases and required a `GH_PAT_BOT` secret the fork does not
+# have — its checkout failed with "Input required and not supplied: token" on every push.
+# A fork only needs the built extension zips for store submission, so this just builds and
+# uploads them as artifacts using the default GITHUB_TOKEN (no PAT, no publish).
 jobs:
-  master:
+  build:
     if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
-    strategy:
-      matrix:
-        step: ['build:release']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GH_PAT_BOT }}
     - uses: actions/setup-node@v4
       with:
-        node-version: 'lts/*'
-    - name: ${{ matrix.step }}
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        GH_PAT: ${{ secrets.GH_PAT_BOT }}
-        GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT_BOT }}
-        GH_RELEASE_FILES: master-ff-build.zip,master-ff-src.zip,master-chrome-build.zip,master-chrome-src.zip
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        node-version: '22'
+    - name: build
       run: |
         corepack enable
         yarn install --immutable
-        yarn ${{ matrix.step }}
+        yarn build
+    - name: upload extension builds
+      uses: actions/upload-artifact@v4
+      with:
+        name: alice-extension-builds
+        path: |
+          master-chrome-build.zip
+          master-ff-build.zip
+        if-no-files-found: error
